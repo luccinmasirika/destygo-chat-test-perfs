@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViaSay Chat Performance Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .header {
+            background: white;
+            color: #0f172a;
+            width: 100%;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 24px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 1.25em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+        }
+
+        .top-nav {
+            background: #0f172a;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .top-nav a:hover {
+            color: white;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            padding: 0;
+            border: none;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-section h2 {
+            color: #0f172a;
+            margin-bottom: 20px;
+            font-size: 1.125em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 6px;
+            font-size: 0.875em;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.875em;
+            transition: all 0.2s ease;
+            background: white;
+            color: #0f172a;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3E83FF;
+            box-shadow: 0 0 0 3px rgba(62, 131, 255, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 36px;
+        }
+
+        .btn-primary {
+            background: #3E83FF;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3670DB;
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .logs-section {
+            margin-top: 24px;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .logs-container {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace;
+            font-size: 0.875em;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            word-wrap: break-word;
+            padding: 2px 0;
+        }
+
+        .log-info { color: #3E83FF; }
+        .log-warn { color: #fbbf24; }
+        .log-error { color: #ef4444; }
+        .log-debug { color: #94a3b8; }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-weight: 500;
+            font-size: 0.875em;
+        }
+
+        .status-ready {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .status-running {
+            background: #fef9c3;
+            color: #854d0e;
+            animation: pulse 2s infinite;
+        }
+
+        .status-complete {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .status-error {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 1.75em;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .logo img {
+            width: 24px;
+            height: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>
+                <svg width="32" height="32" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 0C1.99926 0 0 1.99926 0 10C0 18.0015 1.99926 20 10 20C18.0015 20 20 18.0007 20 10C20.0007 1.99926 18.0015 0 10 0Z" fill="#3E83FF"/>
+                    <path d="M4.71997 7.94451C4.71997 7.13316 5.3773 6.47656 6.18791 6.47656C6.59322 6.47656 6.96021 6.6409 7.22623 6.90619C7.49226 7.17148 7.65586 7.53847 7.65586 7.94451V7.94746C7.65586 8.75881 6.99853 9.41541 6.18791 9.41541C5.3773 9.41541 4.71997 8.75807 4.71997 7.94746V7.94451Z" fill="white"/>
+                    <path d="M11.1711 10.8856V12.9387C11.1711 14.2393 10.1173 15.2924 8.81807 15.2924L7.05904 15.2931C5.76059 15.2931 4.70605 14.2393 4.70605 12.9394C4.70605 11.6395 5.75985 10.5857 7.05978 10.5857L10.8704 10.585H10.8726C10.9551 10.585 11.0296 10.6189 11.0834 10.6727C11.1372 10.7272 11.1711 10.8016 11.1711 10.8842V10.8856Z" fill="white"/>
+                    <path d="M15.2791 12.0549C15.2791 12.8655 14.6218 13.5228 13.8112 13.5228C13.0006 13.5228 12.3433 12.8655 12.3433 12.0549V12.0519C12.3433 11.2413 13.0006 10.584 13.8112 10.584C14.2165 10.584 14.5835 10.7483 14.8495 11.0136C15.1156 11.2796 15.2791 11.6466 15.2791 12.0519V12.0549Z" fill="white"/>
+                    <path d="M12.9374 9.41546L9.1305 9.41619H9.12755C9.04576 9.41546 8.97059 9.3823 8.9168 9.3285C8.863 9.27397 8.8291 9.19954 8.8291 9.11701V9.11553V7.06247C8.8291 5.7618 9.88363 4.70874 11.185 4.70874L12.9374 4.70801C14.2374 4.70801 15.2941 5.7618 15.2941 7.06173C15.2941 8.36166 14.2388 9.41546 12.9374 9.41546Z" fill="white"/>
+                </svg>
+                ViaSay Chat Performance Test
+            </h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="content">
+            <div class="form-section">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.5 10H12.5M7.5 13.3333H10M4.16667 16.6667H15.8333C16.7538 16.6667 17.5 15.9205 17.5 15V5C17.5 4.07953 16.7538 3.33333 15.8333 3.33333H4.16667C3.24619 3.33333 2.5 4.07953 2.5 5V15C2.5 15.9205 3.24619 16.6667 4.16667 16.6667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Configuration du test
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="testUrl">URL de Test *</label>
+                        <input type="text" id="testUrl" required value="http://iris-staging.in.viasay.io/widget/preview/production/index.html?environment=default&token=835fead4-8114-d280-d7f5-eb4970fa4b0f">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userCount">Nombre d'Utilisateurs *</label>
+                            <input type="number" id="userCount" required min="1" value="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="testDuration">Durée du Test (secondes)</label>
+                            <input type="number" id="testDuration" value="60" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="testMessage">Message de Test</label>
+                            <input type="text" id="testMessage" value="Test interface">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="startTest()" id="startBtn">
+                        🚀 Démarrer le Test
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearLogs()">
+                        🗑️ Effacer les Logs
+                    </button>
+                    <button class="btn btn-danger" onclick="stopTest()" id="stopBtn" disabled>
+                        ⏹️ Arrêter le Test
+                    </button>
+                </div>
+
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-ready">✅ Prêt</span>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Test en cours...</p>
+            </div>
+
+            <div class="stats-grid" id="statsGrid" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalMessages">0</div>
+                    <div class="stat-label">Messages Totaux</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successCount">0</div>
+                    <div class="stat-label">Succès</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="errorCount">0</div>
+                    <div class="stat-label">Erreurs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successRate">0%</div>
+                    <div class="stat-label">Taux de Succès</div>
+                </div>
+            </div>
+
+            <div class="logs-section">
+                <div class="logs-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.66667 10H13.3333M6.66667 13.3333H10M4.16667 16.6667H15.8333C16.7538 16.6667 17.5 15.9205 17.5 15V5C17.5 4.07953 16.7538 3.33333 15.8333 3.33333H4.16667C3.24619 3.33333 2.5 4.07953 2.5 5V15C2.5 15.9205 3.24619 16.6667 4.16667 16.6667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Logs du test
+                    </h2>
+                    <button class="btn btn-secondary" onclick="exportLogs()">
+                        📥 Exporter les Logs
+                    </button>
+                </div>
+                <div class="logs-container" id="logsContainer">
+                    <div class="log-entry log-info">Système initialisé. Prêt à démarrer les tests.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testRunning = false;
+        let logs = [];
+        let stats = { total: 0, success: 0, error: 0 };
+        let eventSource = null;
+
+        function addLog(level, message) {
+            const timestamp = new Date().toLocaleTimeString('fr-FR', {
+                hour12: false,
+                fractionalSecondDigits: 3
+            });
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push({ level, message: logEntry, timestamp });
+
+            const logsContainer = document.getElementById('logsContainer');
+            const logElement = document.createElement('div');
+            logElement.className = `log-entry log-${level}`;
+            logElement.textContent = logEntry;
+            logsContainer.appendChild(logElement);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function connectToLogs() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource('/api/logs');
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    if (data.type === 'log') {
+                        // Analyser le message pour extraire les statistiques
+                        if (data.message.includes('Total messages attempted:')) {
+                            const match = data.message.match(/Total messages attempted: (\d+)/);
+                            if (match) stats.total = parseInt(match[1]);
+                        }
+                        if (data.message.includes('Success:')) {
+                            const match = data.message.match(/Success: (\d+)/);
+                            if (match) stats.success = parseInt(match[1]);
+                        }
+                        if (data.message.includes('Errors:')) {
+                            const match = data.message.match(/Errors: (\d+)/);
+                            if (match) stats.error = parseInt(match[1]);
+                        }
+                        if (data.message.includes('Success rate:')) {
+                            const match = data.message.match(/Success rate: ([\d.]+)%/);
+                            if (match) {
+                                const rate = parseFloat(match[1]);
+                                if (rate === 100.00) {
+                                    // Test terminé avec succès
+                                    setTimeout(() => completeTest(), 1000);
+                                }
+                            }
+                        }
+
+                        updateStats();
+                        addLog(data.level, data.message);
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du parsing des logs:', error);
+                }
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('Erreur SSE:', error);
+                addLog('error', 'Connexion aux logs perdue');
+            };
+        }
+
+        function disconnectFromLogs() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        }
+
+        function updateStatus(status, message) {
+            const indicator = document.getElementById('statusIndicator');
+            indicator.innerHTML = `<span class="status-${status}">${message}</span>`;
+        }
+
+        function updateStats() {
+            document.getElementById('totalMessages').textContent = stats.total;
+            document.getElementById('successCount').textContent = stats.success;
+            document.getElementById('errorCount').textContent = stats.error;
+            document.getElementById('successRate').textContent =
+                stats.total > 0 ? `${((stats.success / stats.total) * 100).toFixed(1)}%` : '0%';
+        }
+
+        function showStats() {
+            document.getElementById('statsGrid').style.display = 'grid';
+        }
+
+        function hideStats() {
+            document.getElementById('statsGrid').style.display = 'none';
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function startTest() {
+            const url = document.getElementById('testUrl').value.trim();
+            const numberOfUsers = parseInt(document.getElementById('userCount').value);
+            const testMessage = document.getElementById('testMessage').value.trim();
+            const testDuration = parseInt(document.getElementById('testDuration').value);
+
+            if (!url) {
+                alert('Veuillez saisir une URL de test');
+                return;
+            }
+
+            if (!numberOfUsers || numberOfUsers < 1 || numberOfUsers > 100) {
+                alert('Le nombre d\'utilisateurs doit être entre 1 et 100');
+                return;
+            }
+
+            testRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            hideStats();
+            showLoading();
+            updateStatus('running', '🔄 Test en cours...');
+
+            // Reset stats
+            stats = { total: 0, success: 0, error: 0 };
+            updateStats();
+
+            // Connecter aux logs en temps réel
+            connectToLogs();
+
+            addLog('info', 'Démarrage du test de performance...');
+            addLog('info', `URL: ${url}`);
+            addLog('info', `Nombre d'utilisateurs: ${numberOfUsers}`);
+            addLog('info', `Durée: ${testDuration} secondes`);
+            if (testMessage) {
+                addLog('info', `Message personnalisé: ${testMessage}`);
+            }
+
+            try {
+                const response = await fetch('/api/start-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url,
+                        numberOfUsers,
+                        testMessage,
+                        testDuration
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    addLog('info', 'Test démarré avec succès');
+                    addLog('info', `Test ID: ${result.testId}`);
+                } else {
+                    throw new Error(result.error || 'Erreur inconnue');
+                }
+
+            } catch (error) {
+                addLog('error', `Erreur lors du démarrage du test: ${error.message}`);
+                stopTest();
+            }
+        }
+
+        function completeTest() {
+            testRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            hideLoading();
+            showStats();
+            updateStatus('complete', '✅ Test terminé');
+
+            // Déconnecter des logs
+            disconnectFromLogs();
+        }
+
+        async function stopTest() {
+            testRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            hideLoading();
+            updateStatus('ready', '✅ Prêt');
+
+            // Déconnecter des logs
+            disconnectFromLogs();
+
+            // Arrêter le test côté serveur
+            try {
+                const response = await fetch('/api/stop-test', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    addLog('warn', 'Test arrêté par l\'utilisateur');
+                }
+            } catch (error) {
+                addLog('error', `Erreur lors de l'arrêt du test: ${error.message}`);
+            }
+        }
+
+        function clearLogs() {
+            logs = [];
+            stats = { total: 0, success: 0, error: 0 };
+            document.getElementById('logsContainer').innerHTML =
+                '<div class="log-entry log-info">Logs effacés.</div>';
+            hideStats();
+            updateStatus('ready', '✅ Prêt');
+
+            // Déconnecter des logs
+            disconnectFromLogs();
+        }
+
+        function exportLogs() {
+            const logText = logs.map(log => log.message).join('\n');
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `destygo-test-logs-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('info', 'Interface de test de performance initialisée');
+            addLog('info', 'Remplissez les champs ci-dessus et cliquez sur "Démarrer le Test"');
+
+            // Se connecter aux logs pour voir les messages du serveur
+            connectToLogs();
+        });
+    </script>
+</body>
+</html>

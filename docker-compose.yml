@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # Web interface service
+  viasay-chat-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: viasay-chat-performance-test
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost/health && curl -f http://localhost:3000/api/test-status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  quick-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: destygo-quick-test
+    environment:
+      - NODE_ENV=production
+      - DESTYGO_NUMBER_OF_USERS=5
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    profiles: ["quick"]
+
+  connection-quick-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: destygo-connection-quick
+    environment:
+      - NODE_ENV=production
+      - DESTYGO_NUMBER_OF_USERS=10
+      - DESTYGO_TEST_DURATION=30
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    profiles: ["connection-quick"]
+
+  connection-medium-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: destygo-connection-medium
+    environment:
+      - NODE_ENV=production
+      - DESTYGO_NUMBER_OF_USERS=50
+      - DESTYGO_TEST_DURATION=60
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    profiles: ["connection-medium"]
+
+  connection-large-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: destygo-connection-large
+    environment:
+      - NODE_ENV=production
+      - DESTYGO_NUMBER_OF_USERS=100
+      - DESTYGO_TEST_DURATION=120
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    profiles: ["connection-large"]
+
+  access-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: destygo-access-test
+    environment:
+      - NODE_ENV=production
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    profiles: ["access"]
+
+  custom-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: destygo-custom-test
+    environment:
+      - NODE_ENV=production
+      - DESTYGO_NAVIGATION_TIMEOUT=60000
+      - DESTYGO_CHAT_TIMEOUT=30000
+    profiles: ["custom"]
+
+volumes:
+  logs:
