@@ -12,7 +12,7 @@ commands:
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
-      - run: npm install --production=false --check-files
+      - run: npm install --omit=dev
       - save_cache:
           paths:
             - node_modules
