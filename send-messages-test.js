@@ -59,14 +59,14 @@ async function prepareSession(userId, url) {
         const chatTimeout = parseInt(process.env.DESTYGO_CHAT_TIMEOUT) || 15000;
 
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: navigationTimeout });
-        await page.waitForTimeout(1000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await page.waitForFunction(() => typeof window.DestygoChat !== 'undefined', { timeout: chatTimeout });
         await page.evaluate(() => {
             if (!window.DestygoChat.isOpen()) {
                 window.DestygoChat.ToggleChat({ open: true });
             }
         });
-        await page.waitForTimeout(500);
+        await new Promise(resolve => setTimeout(resolve, 500));
         log('INFO', 'session-manager', 'session_ready', `Session ready for user ${userId}`);
         return { browser, page, userId };
     } catch (error) {

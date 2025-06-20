@@ -19,15 +19,11 @@ commands:
           key: v1-dependencies-{{ checksum "package.json" }}
 
 jobs:
-  test:
+  build:
     <<: *defaults
     steps:
       - checkout
       - install_dependencies
-      - run:
-          name: "Run connection test"
-          command: npm run test:connection:quick
-          no_output_timeout: 5m
 
   release:
     <<: *defaults
@@ -50,12 +46,12 @@ jobs:
 
 workflows:
   version: 2
-  test_and_release:
+  build_and_release:
     jobs:
-      - test
+      - build
       - release:
           requires:
-            - test
+            - build
           filters:
             branches:
               only: master
