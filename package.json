@@ -16,8 +16,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "docker:build": "docker build -t destygo-load-test .",
-    "docker:compose:build": "docker-compose build",
-    "semantic-release": "semantic-release"
+    "docker:compose:build": "docker-compose build"
   },
   "author": "Destygo Chat Engineering Team",
   "license": "MIT",
@@ -27,12 +26,7 @@
     "puppeteer": "^24.10.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0",
-    "@semantic-release/changelog": "^6.0.0",
-    "@semantic-release/git": "^10.0.0",
-    "@semantic-release/github": "^8.0.0",
-    "@semantic-release/exec": "^7.1.0",
-    "semantic-release": "^24.2.5"
+    "nodemon": "^3.0.0"
   },
   "engines": {
     "node": ">=16.0.0",

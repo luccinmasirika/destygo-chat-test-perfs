@@ -401,48 +401,7 @@ Based on recent tests:
 
 ## 🔧 Development
 
-### Commit Convention
-
-This project uses [Semantic Release](https://github.com/semantic-release/semantic-release) for automated versioning. Please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-#### Types:
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation only changes
-- `style`: Changes that do not affect the meaning of the code
-- `refactor`: A code change that neither fixes a bug nor adds a feature
-- `perf`: A code change that improves performance
-- `test`: Adding missing tests or correcting existing tests
-- `chore`: Changes to the build process or auxiliary tools
-
-#### Examples:
-```bash
-git commit -m "feat: add new connection test scenario"
-git commit -m "fix: resolve timeout issue in puppeteer tests"
-git commit -m "docs: update README with new test options"
-git commit -m "test: add unit tests for message validation"
-```
-
-### Automated Releases
-
-When you push to the `main` branch with conventional commits, Semantic Release will:
-1. Analyze commit messages
-2. Determine the next version number
-3. Generate release notes
-4. Create a GitHub release
-5. Update the CHANGELOG.md
-6. Tag the release
-7. Build and push Docker image with the new version
-
-## 🐳 Docker
+### Docker
 
 ### Build Image
 ```bash

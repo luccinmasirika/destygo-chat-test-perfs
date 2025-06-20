@@ -18,6 +18,22 @@ commands:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
+  build_and_push_docker:
+    description: "Build and push Docker image with GitHub tag"
+    steps:
+      - setup_remote_docker
+      - run:
+          name: "Build Docker image"
+          command: |
+            docker build -t $DOCKERHUB_USERNAME/destygo-chat-performance-test:$CIRCLE_TAG .
+            docker build -t $DOCKERHUB_USERNAME/destygo-chat-performance-test:latest .
+      - run:
+          name: "Push Docker images"
+          command: |
+            echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker push $DOCKERHUB_USERNAME/destygo-chat-performance-test:$CIRCLE_TAG
+            docker push $DOCKERHUB_USERNAME/destygo-chat-performance-test:latest
+
 jobs:
   build:
     <<: *defaults
@@ -25,33 +41,24 @@ jobs:
       - checkout
       - install_dependencies
 
-  release:
+  docker:
     <<: *defaults
     steps:
       - checkout
       - install_dependencies
-      - setup_remote_docker
-      - run:
-          name: "Setup Git"
-          command: |
-            git config --global user.email "ci@viasay.io"
-            git config --global user.name "CircleCI"
-      - run:
-          name: "Run Semantic Release"
-          command: npx semantic-release
-          environment:
-            GITHUB_TOKEN: $GITHUB_TOKEN
-            DOCKERHUB_USERNAME: $DOCKERHUB_USERNAME
-            DOCKERHUB_PASS: $DOCKERHUB_PASS
+      - build_and_push_docker
 
 workflows:
   version: 2
-  build_and_release:
+  build:
     jobs:
-      - build
-      - release:
-          requires:
-            - build
+      - build:
           filters:
             branches:
               only: master
+  docker_release:
+    jobs:
+      - docker:
+          filters:
+            tags:
+              only: /^v.*/
