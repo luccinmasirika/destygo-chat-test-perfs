@@ -6,9 +6,9 @@
     "@semantic-release/changelog",
     "@semantic-release/github",
     [
-      "@semantic-release/docker",
+      "@semantic-release/exec",
       {
-        "name": "viasay/destygo-chat-performance-test"
+        "publishCmd": "./scripts/docker-release.sh ${nextRelease.version}"
       }
     ],
     [

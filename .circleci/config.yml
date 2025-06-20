@@ -38,6 +38,7 @@ jobs:
     steps:
       - checkout
       - install_dependencies
+      - setup_remote_docker
       - run:
           name: "Setup Git"
           command: |
@@ -48,47 +49,8 @@ jobs:
           command: npx semantic-release
           environment:
             GITHUB_TOKEN: $GITHUB_TOKEN
-
-  build_and_push_docker:
-    docker:
-      - image: cimg/node:18.0.0
-    description: "Build and push Docker image"
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Login to Docker Hub
-          command: |
-            if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASS" ]; then
-              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            else
-              echo "Docker credentials not provided, skipping login"
-              exit 1
-            fi
-      - run:
-          name: Build Docker image
-          command: |
-            # Extract version from tag (remove 'v' prefix)
-            VERSION=${CIRCLE_TAG#v}
-            echo "Building Docker image with version: $VERSION"
-
-            docker buildx build --platform linux/amd64 \
-              --build-arg VERSION=$VERSION \
-              --build-arg COMMIT=$CIRCLE_SHA1 \
-              -t viasay/destygo-chat-performance-test:$VERSION \
-              -t viasay/destygo-chat-performance-test:latest \
-              --load .
-      - run:
-          name: Push Docker image
-          command: |
-            VERSION=${CIRCLE_TAG#v}
-            echo "Pushing Docker image with version: $VERSION"
-
-            # Push versioned tag
-            docker push viasay/destygo-chat-performance-test:$VERSION
-
-            # Push latest tag
-            docker push viasay/destygo-chat-performance-test:latest
+            DOCKERHUB_USERNAME: $DOCKERHUB_USERNAME
+            DOCKERHUB_PASS: $DOCKERHUB_PASS
 
 workflows:
   version: 2
@@ -101,11 +63,3 @@ workflows:
           filters:
             branches:
               only: master
-      - build_and_push_docker:
-          requires:
-            - release
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /^v.*/

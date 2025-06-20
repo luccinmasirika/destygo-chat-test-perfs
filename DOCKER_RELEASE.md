@@ -1,6 +1,6 @@
 # Docker Release avec Semantic Release
 
-Ce projet utilise Semantic Release pour automatiser les releases et le tagging des images Docker.
+Ce projet utilise Semantic Release pour automatiser les releases et le tagging des images Docker avec un script personnalisé.
 
 ## Comment ça fonctionne
 
@@ -11,9 +11,9 @@ Ce projet utilise Semantic Release pour automatiser les releases et le tagging d
 - Publie sur GitHub
 
 ### 2. Docker Build Automatique
-- Déclenché après chaque release semantic-release
-- Utilise le tag Git comme version Docker
-- Build et push automatique sur Docker Hub
+- Utilise le plugin `@semantic-release/exec` pour exécuter un script personnalisé
+- Le script `scripts/docker-release.sh` build et tag automatiquement l'image Docker
+- Push automatique sur Docker Hub avec les tags de version et `latest`
 
 ## Configuration
 
@@ -22,8 +22,16 @@ Ce projet utilise Semantic Release pour automatiser les releases et le tagging d
 - `@semantic-release/release-notes-generator` : Génère les notes de release
 - `@semantic-release/changelog` : Met à jour le CHANGELOG.md
 - `@semantic-release/github` : Publie sur GitHub
-- `@semantic-release/docker` : Tag automatique des images Docker
+- `@semantic-release/exec` : Exécute le script Docker personnalisé
 - `@semantic-release/git` : Commit des changements
+
+### Script Docker personnalisé
+Le script `scripts/docker-release.sh` :
+- Reçoit la version générée par semantic-release
+- Login automatique sur Docker Hub
+- Build l'image avec les build args appropriés
+- Tag avec la version et `latest`
+- Push sur Docker Hub
 
 ### Tags Docker générés
 - `viasay/destygo-chat-performance-test:1.2.3` (version spécifique)
@@ -33,7 +41,10 @@ Ce projet utilise Semantic Release pour automatiser les releases et le tagging d
 
 1. **Test** : Exécute les tests de performance
 2. **Release** : Lance semantic-release (seulement sur `master`)
-3. **Build Docker** : Build et push l'image Docker (seulement sur les tags `v*`)
+   - Analyse les commits
+   - Génère la nouvelle version
+   - Exécute le script Docker personnalisé
+   - Publie sur GitHub
 
 ## Variables d'environnement requises
 
@@ -101,3 +112,10 @@ docker pull viasay/destygo-chat-performance-test:latest
 # Version spécifique
 docker pull viasay/destygo-chat-performance-test:1.2.3
 ```
+
+## Avantages de cette approche
+
+- **Contrôle total** : Script personnalisé pour le tagging Docker
+- **Flexibilité** : Possibilité d'ajouter des étapes personnalisées
+- **Simplicité** : Un seul job CircleCI pour tout le processus
+- **Fiabilité** : Pas de dépendance à des packages tiers pour Docker
