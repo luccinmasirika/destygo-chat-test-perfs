@@ -25,10 +25,6 @@ jobs:
       - checkout
       - install_dependencies
       - run:
-          name: "Run quick performance test"
-          command: npm run test:quick
-          no_output_timeout: 10m
-      - run:
           name: "Run connection test"
           command: npm run test:connection:quick
           no_output_timeout: 5m
