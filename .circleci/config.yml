@@ -53,9 +53,6 @@ jobs:
     docker:
       - image: cimg/node:18.0.0
     description: "Build and push Docker image"
-    parameters:
-      version:
-        type: string
     steps:
       - checkout
       - setup_remote_docker
@@ -71,15 +68,27 @@ jobs:
       - run:
           name: Build Docker image
           command: |
+            # Extract version from tag (remove 'v' prefix)
+            VERSION=${CIRCLE_TAG#v}
+            echo "Building Docker image with version: $VERSION"
+
             docker buildx build --platform linux/amd64 \
-              --build-arg VERSION=<< parameters.version >> \
+              --build-arg VERSION=$VERSION \
               --build-arg COMMIT=$CIRCLE_SHA1 \
-              -t viasay/destygo-chat-performance-test:<< parameters.version >> \
+              -t viasay/destygo-chat-performance-test:$VERSION \
+              -t viasay/destygo-chat-performance-test:latest \
               --load .
       - run:
           name: Push Docker image
           command: |
-            docker push viasay/destygo-chat-performance-test:<< parameters.version >>
+            VERSION=${CIRCLE_TAG#v}
+            echo "Pushing Docker image with version: $VERSION"
+
+            # Push versioned tag
+            docker push viasay/destygo-chat-performance-test:$VERSION
+
+            # Push latest tag
+            docker push viasay/destygo-chat-performance-test:latest
 
 workflows:
   version: 2
@@ -91,13 +100,12 @@ workflows:
             - test
           filters:
             branches:
-              only: main
+              only: master
       - build_and_push_docker:
           requires:
             - release
-          version: '${CIRCLE_TAG}'
           filters:
             branches:
-              only: main
+              only: master
             tags:
               only: /^v.*/
