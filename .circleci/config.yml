@@ -23,6 +23,17 @@ commands:
     steps:
       - setup_remote_docker
       - run:
+          name: "Debug environment and check tag"
+          command: |
+            echo "CIRCLE_TAG: $CIRCLE_TAG"
+            echo "CIRCLE_BRANCH: $CIRCLE_BRANCH"
+            echo "CIRCLE_SHA1: $CIRCLE_SHA1"
+            if [ -z "$CIRCLE_TAG" ]; then
+              echo "Error: CIRCLE_TAG is not set. This job should only run on tags."
+              exit 1
+            fi
+            echo "Building Docker image with tag: $CIRCLE_TAG"
+      - run:
           name: "Build Docker image"
           command: |
             docker build -t $DOCKERHUB_USERNAME/destygo-chat-performance-test:$CIRCLE_TAG .
