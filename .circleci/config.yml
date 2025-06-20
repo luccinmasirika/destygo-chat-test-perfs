@@ -1,0 +1,103 @@
+version: 2.1
+
+defaults: &defaults
+    docker:
+      - image: cimg/node:18.0.0
+    working_directory: ~/repo
+
+commands:
+  install_dependencies:
+    description: "Install and cache dependencies"
+    steps:
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+      - run: npm ci --production=false
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - install_dependencies
+      - run:
+          name: "Run quick performance test"
+          command: npm run test:quick
+          no_output_timeout: 10m
+      - run:
+          name: "Run connection test"
+          command: npm run test:connection:quick
+          no_output_timeout: 5m
+
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - install_dependencies
+      - run:
+          name: "Setup Git"
+          command: |
+            git config --global user.email "ci@viasay.io"
+            git config --global user.name "CircleCI"
+      - run:
+          name: "Run Semantic Release"
+          command: npx semantic-release
+          environment:
+            GITHUB_TOKEN: $GITHUB_TOKEN
+
+  build_and_push_docker:
+    docker:
+      - image: cimg/node:18.0.0
+    description: "Build and push Docker image"
+    parameters:
+      version:
+        type: string
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Login to Docker Hub
+          command: |
+            if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASS" ]; then
+              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            else
+              echo "Docker credentials not provided, skipping login"
+              exit 1
+            fi
+      - run:
+          name: Build Docker image
+          command: |
+            docker buildx build --platform linux/amd64 \
+              --build-arg VERSION=<< parameters.version >> \
+              --build-arg COMMIT=$CIRCLE_SHA1 \
+              -t viasay/destygo-chat-performance-test:<< parameters.version >> \
+              --load .
+      - run:
+          name: Push Docker image
+          command: |
+            docker push viasay/destygo-chat-performance-test:<< parameters.version >>
+
+workflows:
+  version: 2
+  test_and_release:
+    jobs:
+      - test
+      - release:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
+      - build_and_push_docker:
+          requires:
+            - release
+          version: '${CIRCLE_TAG}'
+          filters:
+            branches:
+              only: main
+            tags:
+              only: /^v.*/

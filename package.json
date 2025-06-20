@@ -10,39 +10,14 @@
     "test:connection:quick": "DESTYGO_NUMBER_OF_USERS=10 DESTYGO_TEST_DURATION=30 node connection-load-test.js",
     "test:connection:medium": "DESTYGO_NUMBER_OF_USERS=50 DESTYGO_TEST_DURATION=60 node connection-load-test.js",
     "test:connection:large": "DESTYGO_NUMBER_OF_USERS=100 DESTYGO_TEST_DURATION=120 node connection-load-test.js",
-    "test:dev": "nodemon send-messages-test.js",
     "test:quick": "DESTYGO_NUMBER_OF_USERS=5 node send-messages-test.js",
     "test:medium": "DESTYGO_NUMBER_OF_USERS=20 node send-messages-test.js",
     "test:large": "DESTYGO_NUMBER_OF_USERS=40 node send-messages-test.js",
-    "test:custom": "echo 'Usage: DESTYGO_NUMBER_OF_USERS=XX DESTYGO_TEST_URL=URL DESTYGO_TEST_MESSAGE=MSG node send-messages-test.js'",
-    "test:connection:custom": "echo 'Usage: DESTYGO_NUMBER_OF_USERS=XX DESTYGO_TEST_URL=URL DESTYGO_TEST_DURATION=SECONDS node connection-load-test.js'",
-    "setup": "node setup-env.js",
-    "setup:interactive": "node setup-env.js",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "web": "node server.js",
     "docker:build": "docker build -t destygo-load-test .",
-    "docker:run": "docker run --rm -e DESTYGO_TEST_URL -e DESTYGO_NUMBER_OF_USERS -e DESTYGO_TEST_DURATION -e DESTYGO_TEST_MESSAGE destygo-load-test",
-    "docker:quick": "npm run docker:build && docker run --rm -e DESTYGO_TEST_URL destygo-load-test npm run test:quick",
-    "docker:connection:quick": "npm run docker:build && docker run --rm -e DESTYGO_TEST_URL destygo-load-test npm run test:connection:quick",
-    "docker:custom": "npm run docker:build && docker run --rm -e DESTYGO_TEST_URL -e DESTYGO_NUMBER_OF_USERS -e DESTYGO_TEST_DURATION -e DESTYGO_TEST_MESSAGE -e DESTYGO_NAVIGATION_TIMEOUT -e DESTYGO_CHAT_TIMEOUT destygo-load-test npm run test",
-    "docker:connection:custom": "npm run docker:build && docker run --rm -e DESTYGO_TEST_URL -e DESTYGO_NUMBER_OF_USERS -e DESTYGO_TEST_DURATION -e DESTYGO_NAVIGATION_TIMEOUT -e DESTYGO_CHAT_TIMEOUT destygo-load-test npm run test:connection",
     "docker:compose:build": "docker-compose build",
-    "docker:compose:quick": "docker-compose --profile quick up --build",
-    "docker:compose:connection-quick": "docker-compose --profile connection-quick up --build",
-    "docker:compose:connection-medium": "docker-compose --profile connection-medium up --build",
-    "docker:compose:connection-large": "docker-compose --profile connection-large up --build",
-    "docker:compose:access": "docker-compose --profile access up --build",
-    "docker:compose:custom": "docker-compose --profile custom up --build",
-    "docker:run:quick": "./docker-run.sh quick",
-    "docker:run:connection:quick": "./docker-run.sh connection:quick",
-    "docker:run:custom": "./docker-run.sh custom",
-    "docker:run:connection:custom": "./docker-run.sh connection:custom",
-    "docker:run:access": "./docker-run.sh access",
-    "docker:run:build": "./docker-run.sh build",
-    "docker:run:help": "./docker-run.sh help",
-    "docs": "cat README.md",
-    "help": "cat QUICK_START.md"
+    "semantic-release": "semantic-release"
   },
   "author": "Destygo Chat Engineering Team",
   "license": "MIT",
@@ -52,7 +27,11 @@
     "puppeteer": "^21.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.0.0",
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/git": "^10.0.0",
+    "@semantic-release/github": "^8.0.0",
+    "semantic-release": "^21.0.0"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -78,11 +57,5 @@
   "preferGlobal": false,
   "publishConfig": {
     "access": "private"
-  },
-  "config": {
-    "defaultUrl": "http://iris-staging.in.viasay.io/widget/preview/production/index.html?environment=default&token=835fead4-8114-d280-d7f5-eb4970fa4b0f",
-    "defaultUsers": 40,
-    "defaultDuration": 1,
-    "defaultPoolSize": 10
   }
 }

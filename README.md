@@ -364,18 +364,6 @@ npm run test:access
 - [Technical Documentation](DOCUMENTATION_TECHNIQUE.md) - Technical implementation details
 - [Environment Configuration](env.example) - Complete configuration reference
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
 ## 🎯 Use Cases
 
 - **Performance Validation:** Ensure system can handle target load
@@ -410,3 +398,83 @@ Based on recent tests:
 ---
 
 **Ready to test your Destygo Chat performance?** Run `npm start` to use the web interface or `npm run test` for command line testing!
+
+## 🔧 Development
+
+### Commit Convention
+
+This project uses [Semantic Release](https://github.com/semantic-release/semantic-release) for automated versioning. Please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Types:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools
+
+#### Examples:
+```bash
+git commit -m "feat: add new connection test scenario"
+git commit -m "fix: resolve timeout issue in puppeteer tests"
+git commit -m "docs: update README with new test options"
+git commit -m "test: add unit tests for message validation"
+```
+
+### Automated Releases
+
+When you push to the `main` branch with conventional commits, Semantic Release will:
+1. Analyze commit messages
+2. Determine the next version number
+3. Generate release notes
+4. Create a GitHub release
+5. Update the CHANGELOG.md
+6. Tag the release
+7. Build and push Docker image with the new version
+
+## 🐳 Docker
+
+### Build Image
+```bash
+docker build -t destygo-load-test .
+```
+
+### Run Tests
+```bash
+# Quick test
+docker run --rm -e DESTYGO_TEST_URL=your-url destygo-load-test npm run test:quick
+
+# Custom test
+docker run --rm \
+  -e DESTYGO_TEST_URL=your-url \
+  -e DESTYGO_NUMBER_OF_USERS=20 \
+  -e DESTYGO_TEST_DURATION=60 \
+  destygo-load-test npm run test
+```
+
+## 📊 Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DESTYGO_TEST_URL` | - | Target URL for testing |
+| `DESTYGO_NUMBER_OF_USERS` | 40 | Number of concurrent users |
+| `DESTYGO_TEST_DURATION` | 1 | Test duration in seconds |
+| `DESTYGO_TEST_MESSAGE` | "Hello from load test" | Message to send |
+| `DESTYGO_NAVIGATION_TIMEOUT` | 60000 | Navigation timeout in ms |
+| `DESTYGO_CHAT_TIMEOUT` | 30000 | Chat timeout in ms |
+
+## 🔗 Links
+
+- [Documentation Technique](./DOCUMENTATION_TECHNIQUE.md)
+- [Interface Web](./WEB_INTERFACE.md)
+- [GitHub Repository](https://github.com/viasay/destygo-chat-performance-tests)
